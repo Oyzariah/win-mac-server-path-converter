@@ -399,3 +399,45 @@ document
 document
     .getElementById("open-btn")
     .addEventListener("click", openConvertedPath);
+
+async function getLatestReleases() {
+    // Replace with your actual GitHub username and repository name
+    const repoPath = "Oyzariah/win-mac-server-path-converter";
+    const apiUrl = `https://api.github.com/repos/${repoPath}/releases/latest`;
+
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error("Network response was not ok");
+        
+        const releaseData = await response.json();
+        let macLink = "";
+        let winLink = "";
+
+        // Loop through the attached files in the latest release
+        releaseData.assets.forEach(asset => {
+            // Find the Mac installer (.dmg)
+            if (asset.name.endsWith(".dmg")) {
+                macLink = asset.browser_download_url;
+            }
+            // Find the Windows installer (.exe or .msi)
+            else if (asset.name.endsWith(".exe") || asset.name.endsWith(".msi")) {
+                winLink = asset.browser_download_url;
+            }
+        });
+
+        // Update the buttons with the direct download URLs
+        if (macLink) {
+            document.getElementById("mac-download-btn").href = macLink;
+        }
+        if (winLink) {
+            document.getElementById("win-download-btn").href = winLink;
+        }
+
+    } catch (error) {
+        console.error("Failed to fetch latest release links from GitHub:", error);
+        // It will just fall back to the default href in the HTML if this happens
+    }
+}
+
+// Run the function as soon as the webpage loads
+document.addEventListener("DOMContentLoaded", getLatestReleases);
